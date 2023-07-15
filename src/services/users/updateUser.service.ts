@@ -12,7 +12,6 @@ export const updateUserService = async (
     old_password,
     password,
     role,
-    dash,
     is_first_access,
     is_active,
   }: IUserUpdateRequest,
@@ -21,11 +20,6 @@ export const updateUserService = async (
   if (role) {
     if (role_user !== 'ADMIN')
       throw new AppError('User is not allowed to change his role', 400);
-  }
-
-  if (dash) {
-    if (role_user !== 'ADMIN')
-      throw new AppError('User is not allowed to change his dash', 400);
   }
 
   if (old_password && password) {
@@ -47,7 +41,6 @@ export const updateUserService = async (
         email,
         password,
         role,
-        dash,
         is_first_access,
         is_active,
       },

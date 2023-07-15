@@ -10,23 +10,10 @@ export const createUserService = async ({
   password,
   cpf,
   role,
-  dash,
 }: IUserRequest) => {
   let user = await prisma.user.findUnique({
     where: { login },
   });
-
-  switch (role) {
-  case 'ADMIN':
-    dash = 'ADMIN';
-    break;
-  case 'SECRET':
-    dash = 'ORGAN';
-    break;
-  case 'DIRET':
-    dash = 'SCHOOL';
-    break;
-  }
 
   if (user) throw new AppError('user already exists', 409);
 
@@ -39,7 +26,6 @@ export const createUserService = async ({
       password,
       cpf,
       role,
-      dash,
     },
   });
 
