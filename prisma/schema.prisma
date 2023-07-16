@@ -16,79 +16,90 @@ enum Role{
   ADMIN
 }
 
+enum Status{
+  PUBLISHED
+  INDRAFT
+  SCHEDULED
+}
+
 model User{
   id String @id @default(uuid())
   name String @db.VarChar(254)
   email String? @db.VarChar(254)
   login String @db.VarChar(128) @unique
-  password String @db.VarChar(128)
-  cpf String @db.VarChar(14) @unique
+  password String? @db.VarChar(128)
+  cpf String? @db.VarChar(14) @unique
   role Role @default(EDITOR)
   is_active Boolean @default(true)
   is_first_access Boolean @default(true)
   created_at DateTime @default(now())
+  blog_id String? @unique
   profile Image?
   token Token?
-  listImage ListImage[]
+  posts Post[]
 
   @@map("users")
 }
 
 model Post{
   id String @id @default(uuid())
-  name String @db.VarChar(254)
-  email String? @db.VarChar(254)
-  login String @db.VarChar(128) @unique
-  password String @db.VarChar(128)
-  cpf String @db.VarChar(14) @unique
-  role Role @default(EDITOR)
-  is_active Boolean @default(true)
-  is_first_access Boolean @default(true)
-  created_at DateTime @default(now())
-  listImage ListImage[]
+  published DateTime @default(now())
+  updated DateTime @default(now())
+  title String @db.Text()
+  content Json? @db.Json()
+  text String @db.Text()
+  status Status @default(INDRAFT)
+  is_free Boolean @default(false)
+  blog_id String? @unique
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String
+  view View?
+  card Card?
+  images ListImage[]
+  tags ListTag[]
 
   @@map("posts")
 }
 
-model PostBlog{
-  id String @id
-  name String @db.VarChar(254)
-  email String? @db.VarChar(254)
-  login String @db.VarChar(128) @unique
-  password String @db.VarChar(128)
-  cpf String @db.VarChar(14) @unique
-  role Role @default(EDITOR)
-  is_active Boolean @default(true)
-  is_first_access Boolean @default(true)
-  created_at DateTime @default(now())
+model Card{
+  id String @id @default(uuid())
+  name String @db.VarChar(254) @unique
+  tag String @db.VarChar(254)
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  post_id String @unique
 
-  @@map("posts_blog")
+  @@map("cards")
 }
 
 model Image{
   id String @id @default(uuid())
-  name String @db.VarChar(200)
-  size Int @db.Integer()
-  url String @db.Text()
-  key String @unique @db.VarChar(200)
+  name String? @db.VarChar(200)
+  size Int? @db.Integer()
+  url String @db.Text() @unique
+  key String? @unique @db.VarChar(200)
   created_at DateTime @default(now())
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id String @unique
-  listImage ListImage[]
+  user User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String? @unique
+  posts ListImage[]
 
   @@map("images")
 }
 
-model ListImage{
-  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
-  post_id String
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id String
-  image Image @relation(fields: [image_id], references: [id], onDelete: Cascade)
-  image_id String
+model Tag{
+  id String @id @default(uuid())
+  name String @db.VarChar(254) @unique
+  posts ListTag[]
 
-  @@id([post_id, user_id, image_id])
-  @@map("list_image")
+  @@map("tags")
+}
+
+model View{
+  id String @id @default(uuid())
+  post Post? @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  post_id String? @unique
+  total Int @default(0)
+
+  @@map("views")
 }
 
 model Token{
@@ -99,4 +110,25 @@ model Token{
   created_at DateTime @default(now())
 
   @@map("token")
+}
+
+model ListImage{
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  post_id String
+  image Image @relation(fields: [image_id], references: [id], onDelete: Cascade)
+  image_id String
+  is_cover Boolean @default(false)
+
+  @@id([post_id, image_id])
+  @@map("list_image")
+}
+
+model ListTag{
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  post_id String
+  tag Tag @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+  tag_id String
+
+  @@id([post_id, tag_id])
+  @@map("list_tag")
 }
