@@ -28,3 +28,11 @@ export const UserUpdateRequestSchema = UserCreateSchema.extend({
   .partial();
 
 export const UserArraySchema = UserReturnSchema.array();
+
+export const UserVerifySchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  profile: z
+    .object({ id: z.string().uuid(), url: z.string().url() })
+    .optional(),
+});

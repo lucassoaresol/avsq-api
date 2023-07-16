@@ -1,31 +1,27 @@
-import { JSDOM } from 'jsdom';
 import axiosInstance from '../../axios';
 import 'dotenv/config';
-
-interface IPostsReturn {
-  items: {
-    id: string;
-    published: string;
-    title: string;
-    content: string;
-    author: { id: string; displayName: string };
-  }[];
-}
+import { IPostsBlogReturn } from '../../interfaces';
+import {
+  cardsAnnouncementReturn,
+  cardsPostReturn,
+  postBlogArrayReturn,
+} from '../../scripts';
 
 export const listPostsHomeService = async () => {
-  const { data } = await axiosInstance.get<IPostsReturn>(
-    `/posts?key=${process.env.BLOGKEY}&fields=items(id,published,title,content,author(id,displayName))`,
-  );
+  const url = `/posts?key=${process.env.BLOGKEY}&fields=nextPageToken,items(id,published,updated,title,content,author(id,displayName),labels)`;
 
-  const posts = data.items.map((el) => {
-    const dom = new JSDOM(el.content);
+  const { data } = await axiosInstance.get<IPostsBlogReturn>(url);
 
-    return {
-      ...el,
-      published: new Date(el.published),
-      img: dom.window.document.querySelector('img').src,
-    };
-  });
+  const [posts, cardsPost, cardsAnnouncement] = await Promise.all([
+    postBlogArrayReturn(data),
+    cardsPostReturn(),
+    cardsAnnouncementReturn(),
+  ]);
 
-  return posts;
+  return {
+    nextPageToken: data.nextPageToken,
+    posts,
+    cardsPost,
+    cardsAnnouncement,
+  };
 };

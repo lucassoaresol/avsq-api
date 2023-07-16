@@ -8,7 +8,7 @@ import 'dotenv/config';
 
 export const deleteImageService = async (id: string) => {
   try {
-    const { key } = await prisma.image.delete({
+    const { key } = await prisma.imageData.delete({
       where: { id },
     });
     if (!process.env.APP_URL) {

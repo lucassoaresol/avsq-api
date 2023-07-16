@@ -1,6 +1,8 @@
 import { Router } from 'express';
-import { listPostsHomeController } from '../controllers';
+import { listPostsController, listPostsHomeController } from '../controllers';
 
 export const postsRouter = Router();
+
+postsRouter.get('', listPostsController);
 
 postsRouter.get('/home', listPostsHomeController);

@@ -6,7 +6,9 @@ export const createImageProfileService = async (
   { originalname: name, path, size, filename: key }: Express.Multer.File,
   user_id: string,
 ) => {
-  let image = await prisma.image.findFirst({ where: { user_id } });
+  let image = await prisma.imageData.findFirst({
+    where: { image: { user_id } },
+  });
   if (image) throw new AppError('image profile already exists', 409);
 
   const data = {
@@ -14,12 +16,11 @@ export const createImageProfileService = async (
     size,
     url: path,
     key,
-    user_id,
   };
 
   if (!process.env.APP_URL) {
-    image = await prisma.image.create({
-      data,
+    image = await prisma.imageData.create({
+      data: { ...data, image: { create: { user_id } } },
     });
     return image;
   }
@@ -27,8 +28,8 @@ export const createImageProfileService = async (
   const url = `${process.env.APP_URL}/files/${key}`;
   data.url = url;
 
-  image = await prisma.image.create({
-    data,
+  image = await prisma.imageData.create({
+    data: { ...data, image: { create: { user_id } } },
   });
 
   return image;
