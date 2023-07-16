@@ -54,34 +54,65 @@ model Post{
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id String
   view View?
-  card Card?
+  card CardPost?
   images ListImage[]
   tags ListTag[]
 
   @@map("posts")
 }
 
-model Card{
+model Announcement{
+  id String @id @default(uuid())
+  name String @db.VarChar(254)
+  is_active Boolean @default(true)
+  card CardAnnouncement @relation(fields: [card_id], references: [id], onDelete: Cascade)
+  card_id String @unique
+  view View?
+  image Image?
+
+  @@map("announcements")
+}
+
+model CardPost{
   id String @id @default(uuid())
   name String @db.VarChar(254) @unique
   tag String @db.VarChar(254)
   post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
   post_id String @unique
 
-  @@map("cards")
+  @@map("cards_post")
 }
 
-model Image{
+model CardAnnouncement{
+  id String @id @default(uuid())
+  name String @db.VarChar(254) @unique
+  announcements Announcement[]
+
+  @@map("cards_announcement")
+}
+
+model ImageData{
   id String @id @default(uuid())
   name String? @db.VarChar(200)
   size Int? @db.Integer()
   url String @db.Text() @unique
   key String? @unique @db.VarChar(200)
   created_at DateTime @default(now())
+  image Image?
+
+  @@map("image_data")
+}
+
+model Image{
+  image ImageData @relation(fields: [image_id], references: [id], onDelete: Cascade)
+  image_id String @unique
   user User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id String? @unique
+  announcement Announcement? @relation(fields: [announcement_id], references: [id], onDelete: Cascade)
+  announcement_id String? @unique
   posts ListImage[]
 
+  @@id(image_id)
   @@map("images")
 }
 
@@ -97,6 +128,8 @@ model View{
   id String @id @default(uuid())
   post Post? @relation(fields: [post_id], references: [id], onDelete: Cascade)
   post_id String? @unique
+  announcement Announcement? @relation(fields: [announcement_id], references: [id], onDelete: Cascade)
+  announcement_id String? @unique
   total Int @default(0)
 
   @@map("views")
@@ -113,9 +146,10 @@ model Token{
 }
 
 model ListImage{
+  key String @default(uuid()) @unique
   post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
   post_id String
-  image Image @relation(fields: [image_id], references: [id], onDelete: Cascade)
+  image Image @relation(fields: [image_id], references: [image_id], onDelete: Cascade)
   image_id String
   is_cover Boolean @default(false)
 
@@ -124,6 +158,7 @@ model ListImage{
 }
 
 model ListTag{
+  key String @default(uuid()) @unique
   post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
   post_id String
   tag Tag @relation(fields: [tag_id], references: [id], onDelete: Cascade)

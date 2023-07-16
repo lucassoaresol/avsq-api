@@ -6,12 +6,13 @@ export const verifyUser = async (author: {
 }) => {
   const { id: blog_id, displayName: name } = author;
 
+  let userReturn = {};
+
   let user = await prisma.user.findUnique({
     where: { blog_id },
     select: {
       id: true,
       name: true,
-      profile: { select: { id: true, url: true } },
     },
   });
 
@@ -21,9 +22,21 @@ export const verifyUser = async (author: {
       select: {
         id: true,
         name: true,
-        profile: { select: { id: true, url: true } },
       },
     });
 
-  return user;
+  userReturn = { ...user };
+
+  const profile = await prisma.imageData.findFirst({
+    where: { image: { user_id: user.id } },
+    select: { id: true, url: true },
+  });
+
+  if (profile)
+    userReturn = {
+      ...userReturn,
+      profile,
+    };
+
+  return userReturn;
 };

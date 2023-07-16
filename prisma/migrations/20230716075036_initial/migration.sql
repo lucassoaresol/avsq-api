@@ -38,26 +38,52 @@ CREATE TABLE "posts" (
 );
 
 -- CreateTable
-CREATE TABLE "cards" (
+CREATE TABLE "announcements" (
+    "id" TEXT NOT NULL,
+    "name" VARCHAR(254) NOT NULL,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "card_id" TEXT NOT NULL,
+
+    CONSTRAINT "announcements_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "cards_post" (
     "id" TEXT NOT NULL,
     "name" VARCHAR(254) NOT NULL,
     "tag" VARCHAR(254) NOT NULL,
     "post_id" TEXT NOT NULL,
 
-    CONSTRAINT "cards_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "cards_post_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "images" (
+CREATE TABLE "cards_announcement" (
+    "id" TEXT NOT NULL,
+    "name" VARCHAR(254) NOT NULL,
+
+    CONSTRAINT "cards_announcement_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "image_data" (
     "id" TEXT NOT NULL,
     "name" VARCHAR(200),
     "size" INTEGER,
     "url" TEXT NOT NULL,
     "key" VARCHAR(200),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "user_id" TEXT,
 
-    CONSTRAINT "images_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "image_data_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "images" (
+    "image_id" TEXT NOT NULL,
+    "user_id" TEXT,
+    "announcement_id" TEXT,
+
+    CONSTRAINT "images_pkey" PRIMARY KEY ("image_id")
 );
 
 -- CreateTable
@@ -72,6 +98,7 @@ CREATE TABLE "tags" (
 CREATE TABLE "views" (
     "id" TEXT NOT NULL,
     "post_id" TEXT,
+    "announcement_id" TEXT,
     "total" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "views_pkey" PRIMARY KEY ("id")
@@ -89,6 +116,7 @@ CREATE TABLE "token" (
 
 -- CreateTable
 CREATE TABLE "list_image" (
+    "key" TEXT NOT NULL,
     "post_id" TEXT NOT NULL,
     "image_id" TEXT NOT NULL,
     "is_cover" BOOLEAN NOT NULL DEFAULT false,
@@ -98,6 +126,7 @@ CREATE TABLE "list_image" (
 
 -- CreateTable
 CREATE TABLE "list_tag" (
+    "key" TEXT NOT NULL,
     "post_id" TEXT NOT NULL,
     "tag_id" TEXT NOT NULL,
 
@@ -117,19 +146,31 @@ CREATE UNIQUE INDEX "users_blog_id_key" ON "users"("blog_id");
 CREATE UNIQUE INDEX "posts_blog_id_key" ON "posts"("blog_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "cards_name_key" ON "cards"("name");
+CREATE UNIQUE INDEX "announcements_card_id_key" ON "announcements"("card_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "cards_post_id_key" ON "cards"("post_id");
+CREATE UNIQUE INDEX "cards_post_name_key" ON "cards_post"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "images_url_key" ON "images"("url");
+CREATE UNIQUE INDEX "cards_post_post_id_key" ON "cards_post"("post_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "images_key_key" ON "images"("key");
+CREATE UNIQUE INDEX "cards_announcement_name_key" ON "cards_announcement"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "image_data_url_key" ON "image_data"("url");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "image_data_key_key" ON "image_data"("key");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "images_image_id_key" ON "images"("image_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "images_user_id_key" ON "images"("user_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "images_announcement_id_key" ON "images"("announcement_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "tags_name_key" ON "tags"("name");
@@ -138,19 +179,40 @@ CREATE UNIQUE INDEX "tags_name_key" ON "tags"("name");
 CREATE UNIQUE INDEX "views_post_id_key" ON "views"("post_id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "views_announcement_id_key" ON "views"("announcement_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "token_user_id_key" ON "token"("user_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "list_image_key_key" ON "list_image"("key");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "list_tag_key_key" ON "list_tag"("key");
 
 -- AddForeignKey
 ALTER TABLE "posts" ADD CONSTRAINT "posts_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "cards" ADD CONSTRAINT "cards_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "announcements" ADD CONSTRAINT "announcements_card_id_fkey" FOREIGN KEY ("card_id") REFERENCES "cards_announcement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "cards_post" ADD CONSTRAINT "cards_post_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "images" ADD CONSTRAINT "images_image_id_fkey" FOREIGN KEY ("image_id") REFERENCES "image_data"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "images" ADD CONSTRAINT "images_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "images" ADD CONSTRAINT "images_announcement_id_fkey" FOREIGN KEY ("announcement_id") REFERENCES "announcements"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "views" ADD CONSTRAINT "views_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "views" ADD CONSTRAINT "views_announcement_id_fkey" FOREIGN KEY ("announcement_id") REFERENCES "announcements"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "token" ADD CONSTRAINT "token_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -159,7 +221,7 @@ ALTER TABLE "token" ADD CONSTRAINT "token_user_id_fkey" FOREIGN KEY ("user_id") 
 ALTER TABLE "list_image" ADD CONSTRAINT "list_image_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "list_image" ADD CONSTRAINT "list_image_image_id_fkey" FOREIGN KEY ("image_id") REFERENCES "images"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "list_image" ADD CONSTRAINT "list_image_image_id_fkey" FOREIGN KEY ("image_id") REFERENCES "images"("image_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "list_tag" ADD CONSTRAINT "list_tag_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;

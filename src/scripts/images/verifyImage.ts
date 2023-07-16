@@ -4,15 +4,15 @@ export const verifyImage = async (
   url: string,
   post_id = '',
   is_cover = false,
-) => {
-  let image = await prisma.image.findUnique({
+): Promise<{ id: string; url: string; is_cover?: boolean }> => {
+  let image = await prisma.imageData.findUnique({
     where: { url },
     select: { id: true, url: true },
   });
 
   if (!image)
-    image = await prisma.image.create({
-      data: { url },
+    image = await prisma.imageData.create({
+      data: { url, image: { create: {} } },
       select: { id: true, url: true },
     });
 

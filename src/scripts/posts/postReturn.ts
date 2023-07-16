@@ -2,8 +2,11 @@ import { JSDOM } from 'jsdom';
 import { IPostsBlogReturn } from '../../interfaces';
 import prisma from '../../prisma';
 import { verifyImageArray } from '../images';
-import { verifyUser } from '../user/verifyUser';
+import { verifyUser } from '../user';
 import { verifyTagArray } from '../tags';
+import { UserVerifySchema } from '../../schemas';
+
+
 
 const postBlogReturn = async (postData: {
   published: Date;
@@ -30,7 +33,7 @@ const postBlogReturn = async (postData: {
     labels,
   } = postData;
 
-  const user = await verifyUser(author);
+  const user = UserVerifySchema.parse(await verifyUser(author));
 
   let post = await prisma.post.findUnique({ where: { blog_id } });
 
@@ -54,7 +57,9 @@ const postBlogReturn = async (postData: {
     verifyTagArray(labels, post.id),
   ]);
 
-  return { ...post, images: imagesData, tags, user };
+  const cover = imagesData.filter((el) => el.is_cover)[0];
+
+  return { ...post, cover, images: imagesData, tags, user };
 };
 
 export const postBlogArrayReturn = async (postsBlog: IPostsBlogReturn) => {
