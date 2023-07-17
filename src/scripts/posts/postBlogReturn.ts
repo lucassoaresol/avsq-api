@@ -41,6 +41,7 @@ const postBlogReturn = async (postData: {
       data: {
         content,
         text,
+        description: text,
         title,
         updated,
         published,

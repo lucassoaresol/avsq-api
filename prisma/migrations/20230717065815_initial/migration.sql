@@ -29,6 +29,7 @@ CREATE TABLE "posts" (
     "title" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "text" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
     "status" "Status" NOT NULL DEFAULT 'INDRAFT',
     "is_free" BOOLEAN NOT NULL DEFAULT false,
     "blog_id" TEXT,
