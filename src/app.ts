@@ -2,6 +2,7 @@ import 'express-async-errors';
 import express from 'express';
 import { errorHandler } from './errors';
 import {
+  imageRouter,
   passwordRouter,
   postsRouter,
   sessionRouter,
@@ -24,6 +25,7 @@ app.use('/users', userRouter);
 app.use('/posts', postsRouter);
 app.use('/login', sessionRouter);
 app.use('/password', passwordRouter);
+app.use('/images', imageRouter);
 
 app.use(errorHandler);
 

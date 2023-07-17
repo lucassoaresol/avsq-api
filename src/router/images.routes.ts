@@ -4,6 +4,7 @@ import { upload } from '../utils';
 import {
   createImageProfileController,
   deleteImageController,
+  updateImageProfileController,
 } from '../controllers';
 
 export const imageRouter = Router();
@@ -16,3 +17,10 @@ imageRouter.post(
 );
 
 imageRouter.delete('/:id', verifyUserIsAuthenticated, deleteImageController);
+
+imageRouter.patch(
+  '/user/:id',
+  verifyUserIsAuthenticated,
+  upload.single('image'),
+  updateImageProfileController,
+);
