@@ -1,16 +1,20 @@
-import axiosInstance from '../../axios';
-import 'dotenv/config';
-import { IPostQuery, IPostsBlogReturn } from '../../interfaces';
-import { postBlogArrayReturn } from '../../scripts';
+import { IQuery } from '../../interfaces';
+import prisma from '../../prisma';
+import { postArrayReturn } from '../../scripts';
 
-export const listPostsService = async ({ pageToken }: IPostQuery) => {
-  let url = `/posts?key=${process.env.BLOGKEY}&fields=nextPageToken,items(id,published,updated,title,content,author(id,displayName),labels)`;
+export const listPostsService = async ({ take, skip }: IQuery) => {
+  if (take) take = +take;
+  if (skip) skip = +skip;
 
-  if (pageToken) url += `&pageToken=${pageToken}`;
+  const [posts, total] = await Promise.all([
+    prisma.post.findMany({
+      take,
+      skip,
+      orderBy: { published: 'desc' },
+      select: { id: true },
+    }),
+    prisma.post.count(),
+  ]);
 
-  const { data } = await axiosInstance.get<IPostsBlogReturn>(url);
-
-  const result = await postBlogArrayReturn(data);
-
-  return { nextPageToken: data.nextPageToken, result };
+  return { total, result: await postArrayReturn(posts) };
 };

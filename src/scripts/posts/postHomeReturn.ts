@@ -1,4 +1,4 @@
-import prisma from '../../prisma';
+import { postReturn } from './postReturn';
 
 export const postHomeReturn = async (card: {
   id: string;
@@ -6,26 +6,7 @@ export const postHomeReturn = async (card: {
   tag: string;
   post_id: string;
 }) => {
-  const { post_id } = card;
-
-  const id = post_id;
-
-  const post = await prisma.post.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      title: true,
-      published: true,
-      user: { select: { id: true, name: true } },
-    },
-  });
-
-  const cover = await prisma.imageData.findFirst({
-    where: { image: { posts: { some: { post_id, is_cover: true } } } },
-    select: { id: true, url: true },
-  });
-
-  return { ...card, post: { ...post, cover } };
+  return { ...card, post: await postReturn(card.post_id) };
 };
 
 export const postHomeArrayReturn = async (
