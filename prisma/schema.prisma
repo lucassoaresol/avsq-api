@@ -46,7 +46,7 @@ model Post{
   published DateTime @default(now())
   updated DateTime @default(now())
   title String @db.Text()
-  content Json? @db.Json()
+  content String @db.Text()
   text String @db.Text()
   status Status @default(INDRAFT)
   is_free Boolean @default(false)
@@ -77,8 +77,8 @@ model CardPost{
   id String @id @default(uuid())
   name String @db.VarChar(254) @unique
   tag String @db.VarChar(254)
-  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
-  post_id String @unique
+  post Post? @relation(fields: [post_id], references: [id], onDelete: SetNull)
+  post_id String? @unique
 
   @@map("cards_post")
 }

@@ -24,6 +24,7 @@ const postBlogReturn = async (postData: {
     id: blog_id,
     images,
     author,
+    content,
     text,
     title,
     updated,
@@ -38,6 +39,7 @@ const postBlogReturn = async (postData: {
   if (!post)
     post = await prisma.post.create({
       data: {
+        content,
         text,
         title,
         updated,

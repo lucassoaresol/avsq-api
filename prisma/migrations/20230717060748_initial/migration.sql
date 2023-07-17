@@ -27,7 +27,7 @@ CREATE TABLE "posts" (
     "published" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "title" TEXT NOT NULL,
-    "content" JSON,
+    "content" TEXT NOT NULL,
     "text" TEXT NOT NULL,
     "status" "Status" NOT NULL DEFAULT 'INDRAFT',
     "is_free" BOOLEAN NOT NULL DEFAULT false,
@@ -52,7 +52,7 @@ CREATE TABLE "cards_post" (
     "id" TEXT NOT NULL,
     "name" VARCHAR(254) NOT NULL,
     "tag" VARCHAR(254) NOT NULL,
-    "post_id" TEXT NOT NULL,
+    "post_id" TEXT,
 
     CONSTRAINT "cards_post_pkey" PRIMARY KEY ("id")
 );
@@ -197,7 +197,7 @@ ALTER TABLE "posts" ADD CONSTRAINT "posts_user_id_fkey" FOREIGN KEY ("user_id") 
 ALTER TABLE "announcements" ADD CONSTRAINT "announcements_card_id_fkey" FOREIGN KEY ("card_id") REFERENCES "cards_announcement"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "cards_post" ADD CONSTRAINT "cards_post_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "posts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "cards_post" ADD CONSTRAINT "cards_post_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "posts"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "images" ADD CONSTRAINT "images_image_id_fkey" FOREIGN KEY ("image_id") REFERENCES "image_data"("id") ON DELETE CASCADE ON UPDATE CASCADE;
