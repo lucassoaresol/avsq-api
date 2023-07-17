@@ -3,6 +3,7 @@ import {
   listPostsBlogService,
   listPostsHomeService,
   listPostsService,
+  retrievePostService,
 } from '../services';
 
 export const listPostsController = async (req: Request, res: Response) => {
@@ -17,5 +18,10 @@ export const listPostsBlogController = async (req: Request, res: Response) => {
 
 export const listPostsHomeController = async (req: Request, res: Response) => {
   const posts = await listPostsHomeService();
+  return res.json(posts);
+};
+
+export const retrievePostController = async (req: Request, res: Response) => {
+  const posts = await retrievePostService(req.params.id);
   return res.json(posts);
 };
